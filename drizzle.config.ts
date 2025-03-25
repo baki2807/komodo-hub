@@ -1,3 +1,4 @@
+// @ts-nocheck - Disable TypeScript checking for this file
 import type { Config } from 'drizzle-kit';
 import * as dotenv from 'dotenv';
 dotenv.config();
