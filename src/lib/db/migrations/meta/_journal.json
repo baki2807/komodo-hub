@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1742680478299,
+      "tag": "0000_closed_manta",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1742771954603,
+      "tag": "0001_loose_ben_parker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742863384479,
+      "tag": "0002_low_mesmero",
+      "breakpoints": true
+    }
+  ]
+}
