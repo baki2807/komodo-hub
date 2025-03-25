@@ -1,13 +1,17 @@
+// @ts-ignore
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema'
 
-// @ts-ignore
+// Safely access environment variables
 const connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {
   throw new Error('DATABASE_URL is not set in environment variables')
 }
+
+// Determine if we're in production
+const isProduction = process.env.NODE_ENV === 'production'
 
 function logError(error: unknown, context: string) {
   const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -25,6 +29,7 @@ const queryClient = postgres(connectionString, {
   idle_timeout: 20, // Max idle time in seconds
   connect_timeout: 10, // Connection timeout in seconds
   max_lifetime: 60 * 30, // Max connection lifetime in seconds (30 minutes)
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
   types: {
     uuid: {
       to: 36,
