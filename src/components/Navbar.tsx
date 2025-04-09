@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SignInButton, SignOutButton, useUser } from '@clerk/nextjs'
+import { SignInButton, SignUpButton, SignOutButton, useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from './ThemeToggle'
 import { useEffect, useState } from 'react'
@@ -101,15 +101,25 @@ export function Navbar() {
                       </Button>
                     </SignOutButton>
                   ) : (
-                    <SignInButton>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white font-normal px-3"
-                      >
-                        Sign In
-                      </Button>
-                    </SignInButton>
+                    <>
+                      <SignInButton>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white font-normal px-3"
+                        >
+                          Sign In
+                        </Button>
+                      </SignInButton>
+                      <SignUpButton>
+                        <Button 
+                          size="sm"
+                          className="bg-primary text-primary-foreground hover:bg-primary/90 font-normal px-3"
+                        >
+                          Sign Up
+                        </Button>
+                      </SignUpButton>
+                    </>
                   )}
                 </>
               )}
@@ -178,16 +188,27 @@ export function Navbar() {
                     </Button>
                   </SignOutButton>
                 ) : (
-                  <SignInButton>
-                    <Button 
-                      size="sm" 
-                      variant="ghost" 
-                      className="text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white font-normal px-3"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign In
-                    </Button>
-                  </SignInButton>
+                  <>
+                    <SignInButton>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white font-normal px-3"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Sign In
+                      </Button>
+                    </SignInButton>
+                    <SignUpButton>
+                      <Button 
+                        size="sm"
+                        className="bg-primary text-primary-foreground hover:bg-primary/90 font-normal px-3"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Sign Up
+                      </Button>
+                    </SignUpButton>
+                  </>
                 )}
               </div>
             </div>
