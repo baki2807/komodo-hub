@@ -5,7 +5,7 @@ import { useUser } from '@clerk/nextjs'
 import { Navbar } from '@/components/Navbar'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { Camera, Link as LinkIcon, Twitter, Github, Linkedin, Mail, Edit2 } from 'lucide-react'
+import { Camera, Link as LinkIcon, Twitter, Github, Linkedin, Mail, Edit2, Trash2 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
 import FixAvatar from './fix-avatar'
@@ -39,10 +39,18 @@ interface User {
   }
 }
 
+// Add a cache-busting utility function
+const addCacheBuster = (url: string | null) => {
+  if (!url) return '/default-avatar.png';
+  const cacheBuster = `t=${new Date().getTime()}`;
+  return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
+};
+
 export default function ProfilePage() {
   const { user, isLoaded } = useUser()
   const [isEditing, setIsEditing] = useState(false)
   const [profileImage, setProfileImage] = useState<string | null>(null)
+  const [imageVersion, setImageVersion] = useState(Date.now())
   const [coverImage, setCoverImage] = useState<string | null>(null)
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
@@ -57,8 +65,14 @@ export default function ProfilePage() {
     mostActiveDay: '',
     mostActiveTime: ''
   })
+  const [stats, setStats] = useState({
+    completedModules: 0,
+    totalModules: 0
+  })
   const fileInputRef = useRef<HTMLInputElement>(null)
   const coverPhotoRef = useRef<HTMLInputElement>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const fetchUserPosts = useCallback(async () => {
     try {
@@ -104,10 +118,26 @@ export default function ProfilePage() {
     }
   }, [user?.id])
 
+  const fetchUserProgress = async () => {
+    try {
+      const response = await fetch('/api/user-progress?courseId=all')
+      if (response.ok) {
+        const progress = await response.json()
+        setStats({
+          completedModules: progress.completedModules?.length || 0,
+          totalModules: progress.totalModules || 0
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching user progress:', error)
+    }
+  }
+
   useEffect(() => {
     if (isLoaded && user) {
       fetchProfile()
       fetchUserPosts()
+      fetchUserProgress()
     }
   }, [isLoaded, user, fetchUserPosts])
 
@@ -134,7 +164,17 @@ export default function ProfilePage() {
 
     try {
       setIsLoading(true)
+      
+      // Upload the image to Clerk
       await user?.setProfileImage({ file })
+      
+      // Add a slightly longer delay to allow Clerk to update the URL
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      
+      // Force reload the user to get the updated image URL
+      await user?.reload()
+      
+      // Get the updated image URL
       const imageUrl = user?.imageUrl || null
       
       // Update profile in database with new image URL
@@ -152,7 +192,9 @@ export default function ProfilePage() {
 
       if (!response.ok) throw new Error('Failed to update profile')
       
+      // Ensure the UI is updated with the latest image
       setProfileImage(imageUrl)
+      setImageVersion(Date.now())
       toast.success('Profile picture updated!')
     } catch (error) {
       console.error('Error uploading image:', error)
@@ -257,6 +299,34 @@ export default function ProfilePage() {
       toast.error(error instanceof Error ? error.message : 'Failed to update profile')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true)
+      const response = await fetch('/api/profile/delete', {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete account')
+      }
+
+      const data = await response.json()
+      toast.success('Account deleted successfully')
+      
+      // Redirect to Clerk dashboard for account deletion
+      if (data.redirectTo) {
+        window.location.href = data.redirectTo
+      }
+    } catch (error) {
+      console.error('Error deleting account:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to delete account')
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -427,6 +497,12 @@ export default function ProfilePage() {
     ) : null;
   };
 
+  // Update this to use the image version
+  const getImageUrl = () => {
+    const baseUrl = profileImage || user?.imageUrl || '/default-avatar.png';
+    return `${baseUrl}?v=${imageVersion}`;
+  };
+
   if (!isLoaded) {
     return (
       <main className="min-h-screen bg-background">
@@ -453,19 +529,22 @@ export default function ProfilePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative h-64 bg-muted"
+        className="relative h-80 bg-muted"
       >
         {coverImage ? (
-          <img
-            src={coverImage}
-            alt="Cover"
-            className="w-full h-full object-cover"
-          />
+          <>
+            <img
+              src={coverImage}
+              alt="Cover"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80" />
+          </>
         ) : (
-          <div className="w-full h-full bg-primary/5" />
+          <div className="w-full h-full bg-gradient-to-br from-primary/5 to-primary/10" />
         )}
-        <label className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm rounded-full p-2 shadow-lg cursor-pointer hover:bg-background transition-all">
-          <Camera className="w-5 h-5 text-foreground" />
+        <label className="absolute bottom-4 right-4 bg-background/80 backdrop-blur-sm rounded-full p-2 shadow-lg cursor-pointer hover:bg-background transition-all group">
+          <Camera className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
           <input
             type="file"
             ref={coverPhotoRef}
@@ -486,20 +565,26 @@ export default function ProfilePage() {
             transition={{ duration: 0.5 }}
             className="relative mx-auto mb-6"
           >
-            <div className="w-32 h-32 mx-auto relative">
-              <img
-                src={profileImage || user?.imageUrl || '/default-avatar.png'}
-                alt={`${firstName} ${lastName}`}
-                className="w-full h-full rounded-full object-cover border-4 border-background"
-                onError={(e) => {
-                  // If the image fails to load, fallback to the default avatar
-                  const target = e.target as HTMLImageElement;
-                  target.onerror = null; // Prevent infinite loop
-                  target.src = '/default-avatar.png';
-                }}
-              />
-              <label className="absolute bottom-0 right-0 bg-primary/10 hover:bg-primary/20 transition-colors rounded-full p-2 cursor-pointer">
-                <Camera className="w-4 h-4 text-primary" />
+            <div className="w-40 h-40 mx-auto relative">
+              <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-background shadow-xl">
+                {isLoading ? (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+                    <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin"></div>
+                  </div>
+                ) : null}
+                <img
+                  src={getImageUrl()}
+                  alt={`${firstName} ${lastName}`}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.onerror = null;
+                    target.src = '/default-avatar.png';
+                  }}
+                />
+              </div>
+              <label className={`absolute -bottom-2 -right-2 ${isLoading ? 'bg-primary/5 cursor-not-allowed' : 'bg-primary/10 hover:bg-primary/20 cursor-pointer'} transition-colors rounded-full p-2 shadow-lg`}>
+                <Camera className={`w-5 h-5 ${isLoading ? 'text-primary/50' : 'text-primary'}`} />
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -519,14 +604,14 @@ export default function ProfilePage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-center mb-8"
           >
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-4xl font-bold mb-2">
               {firstName} {lastName}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mb-4">
               {user?.emailAddresses[0]?.emailAddress}
             </p>
             
-            <div className="flex justify-center gap-3 mt-4">
+            <div className="flex justify-center gap-3 mb-4">
               <Button
                 onClick={() => setIsEditing(true)}
                 size="sm"
@@ -537,7 +622,6 @@ export default function ProfilePage() {
                 Edit Profile
               </Button>
               
-              {/* Fix Avatar button for development */}
               <FixAvatar />
             </div>
             
@@ -557,7 +641,7 @@ export default function ProfilePage() {
                 whileHover={{ scale: 1.02 }}
                 className="bg-card rounded-xl shadow-sm p-6"
               >
-                <h2 className="text-xl font-semibold mb-4">Bio</h2>
+                <h2 className="text-xl font-semibold mb-4">About Me</h2>
                 {isEditing ? (
                   renderEditableProfile()
                 ) : (
@@ -565,6 +649,44 @@ export default function ProfilePage() {
                     {bio || 'No bio yet'}
                   </p>
                 )}
+              </motion.div>
+
+              {/* Conservation Progress */}
+              <motion.div 
+                whileHover={{ scale: 1.02 }}
+                className="bg-card rounded-xl shadow-sm p-6"
+              >
+                <h2 className="text-xl font-semibold mb-4">Conservation Progress</h2>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Learning Progress</span>
+                      <span className="text-primary">{stats.completedModules}/{stats.totalModules} modules</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(stats.completedModules / stats.totalModules) * 100}%` }}
+                        transition={{ duration: 1, delay: 0.8 }}
+                        className="h-full bg-primary"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Community Engagement</span>
+                      <span className="text-primary">{activityStats.recentPosts}/5 posts this week</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(activityStats.recentPosts / 5 * 100, 100)}%` }}
+                        transition={{ duration: 1, delay: 0.8 }}
+                        className="h-full bg-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
 
@@ -579,7 +701,7 @@ export default function ProfilePage() {
                 whileHover={{ scale: 1.02 }}
                 className="bg-card rounded-xl shadow-sm p-6"
               >
-                <h2 className="text-xl font-semibold mb-4">Activity</h2>
+                <h2 className="text-xl font-semibold mb-4">Activity Overview</h2>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Total Posts</span>
@@ -612,27 +734,23 @@ export default function ProfilePage() {
                 </div>
               </motion.div>
 
+              {/* Delete Account Section */}
               <motion.div 
                 whileHover={{ scale: 1.02 }}
-                className="bg-card rounded-xl shadow-sm p-6"
+                className="bg-destructive/5 rounded-xl shadow-sm p-6"
               >
-                <h2 className="text-xl font-semibold mb-4">Engagement</h2>
-                <div className="space-y-2">
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Weekly Goal</span>
-                      <span className="text-primary">{activityStats.recentPosts}/5 posts</span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(activityStats.recentPosts / 5 * 100, 100)}%` }}
-                        transition={{ duration: 1, delay: 0.8 }}
-                        className="h-full bg-primary"
-                      />
-                    </div>
-                  </div>
-                </div>
+                <h2 className="text-xl font-semibold mb-4 text-destructive">Danger Zone</h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Once you delete your account, there is no going back. Please be certain.
+                </p>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  disabled={isDeleting}
+                  className="w-full"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Account'}
+                </Button>
               </motion.div>
             </motion.div>
           </div>

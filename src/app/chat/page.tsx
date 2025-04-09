@@ -291,78 +291,39 @@ function ChatContent() {
                       <p className="text-muted-foreground">No messages yet. Start a conversation!</p>
                     </div>
                   ) : (
-                    messages.map((message) => (
-                      <motion.div
-                        key={message._id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex items-start gap-2 ${
-                          message.sender.id === user?.id ? 'justify-end' : 'justify-start'
-                        }`}
-                      >
-                        {message.sender.id !== user?.id && (
-                          <img
-                            src={message.sender.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(message.sender.name)}&background=random`}
-                            alt={message.sender.name}
-                            className="w-8 h-8 rounded-full object-cover mt-1 border border-muted"
-                          />
-                        )}
-                        
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                      {messages.map((message) => (
                         <div
-                          className={`max-w-[70%] rounded-lg p-3 relative group ${
+                          key={message._id}
+                          className={`flex ${
                             message.sender.id === user?.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
+                              ? "justify-end"
+                              : "justify-start"
                           }`}
                         >
-                          {message.sender.id !== user?.id && (
-                            <p className="text-xs font-semibold mb-1">{message.sender.name}</p>
-                          )}
-                          <p>{message.content}</p>
-                          <p className="text-xs mt-1 opacity-70">
-                            {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-                          </p>
-                          
-                          {message.sender.id === user?.id && (
-                            <div className="absolute right-0 top-0 -mr-2 -mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
-                                    <MoreVertical className="h-3 w-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem
-                                    className="text-destructive focus:text-destructive flex items-center gap-2"
-                                    onClick={() => handleDeleteMessage(message._id)}
-                                    disabled={isDeletingMessage === message._id}
-                                  >
-                                    {isDeletingMessage === message._id ? (
-                                      <span>Deleting...</span>
-                                    ) : (
-                                      <>
-                                        <Trash2 className="w-4 h-4" />
-                                        <span>Delete</span>
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          )}
+                          <div
+                            className={`max-w-[70%] rounded-lg p-3 ${
+                              message.sender.id === user?.id
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-800"
+                            }`}
+                          >
+                            <p className="text-sm">{message.content}</p>
+                            <p className="text-xs mt-1 opacity-70">
+                              {new Date(message.createdAt).toLocaleString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
+                            </p>
+                          </div>
                         </div>
-                        
-                        {message.sender.id === user?.id && (
-                          <img
-                            src={user.imageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || '')}&background=random`}
-                            alt={user.fullName || 'You'}
-                            className="w-8 h-8 rounded-full object-cover mt-1 border border-muted"
-                          />
-                        )}
-                      </motion.div>
-                    ))
+                      ))}
+                      <div ref={messagesEndRef} />
+                    </div>
                   )}
-                  <div ref={messagesEndRef} />
                 </div>
 
                 <div className="flex gap-2">

@@ -4,10 +4,12 @@ import postgres from 'postgres'
 import * as schema from './schema'
 
 // Safely access environment variables
-const connectionString = process.env.DATABASE_URL
+let connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {
-  throw new Error('DATABASE_URL is not set in environment variables')
+  // Fallback to hardcoded connection string if environment variable isn't loaded
+  connectionString = 'postgres://postgres.ljfzequmcnhjjozdyagh:Abida1966.@aws-0-eu-west-2.pooler.supabase.com:6543/postgres'
+  console.log('Using fallback database connection string')
 }
 
 // Determine if we're in production

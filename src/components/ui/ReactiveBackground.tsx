@@ -3,8 +3,9 @@
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useState, useEffect } from "react"
+import { cn } from "@/lib/utils"
 
-export function ReactiveBackground() {
+export function ReactiveBackground({ className }: { className?: string }) {
   const { theme } = useTheme()
   const [isClient, setIsClient] = useState(false)
 
@@ -19,7 +20,10 @@ export function ReactiveBackground() {
     <>
       {/* Grid Pattern */}
       <div 
-        className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,transparent)]"
+        className={cn(
+          "absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,white,transparent)]",
+          className
+        )}
       />
 
       {/* Base Gradient */}

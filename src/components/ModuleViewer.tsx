@@ -104,41 +104,41 @@ export const ModuleViewer = ({
   return (
     <div className="bg-card border rounded-xl shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="border-b bg-card/60 px-6 py-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-medium">{currentLesson.title}</h3>
+      <div className="border-b bg-card/60 px-4 sm:px-6 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2">
+          <h3 className="text-base sm:text-lg font-medium mb-1 sm:mb-0">{currentLesson.title}</h3>
           <div className="flex items-center">
-            <span className="text-sm text-muted-foreground mr-2">{currentLesson.duration}</span>
-            <span className="text-sm font-medium">{currentLessonIndex + 1}/{lessons.length}</span>
+            <span className="text-xs sm:text-sm text-muted-foreground mr-2">{currentLesson.duration}</span>
+            <span className="text-xs sm:text-sm font-medium">{currentLessonIndex + 1}/{lessons.length}</span>
           </div>
         </div>
         <Progress value={progress} className="h-1.5" />
       </div>
       
       {/* Tab Navigation */}
-      <div className="flex border-b">
+      <div className="flex border-b overflow-x-auto">
         <button
           onClick={() => setActiveSection('content')}
-          className={`flex-1 py-3 px-4 text-center text-sm font-medium border-b-2 ${
+          className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap ${
             activeSection === 'content' 
               ? 'border-primary text-primary' 
               : 'border-transparent hover:text-primary/80 hover:border-primary/30'
           }`}
         >
-          <BookOpen className="w-4 h-4 inline-block mr-2" />
+          <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-2" />
           Content
         </button>
         
         {currentLesson.activities && (
           <button
             onClick={() => setActiveSection('activities')}
-            className={`flex-1 py-3 px-4 text-center text-sm font-medium border-b-2 ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap ${
               activeSection === 'activities' 
                 ? 'border-primary text-primary' 
                 : 'border-transparent hover:text-primary/80 hover:border-primary/30'
             }`}
           >
-            <FileText className="w-4 h-4 inline-block mr-2" />
+            <FileText className="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-2" />
             Activities
           </button>
         )}
@@ -146,44 +146,44 @@ export const ModuleViewer = ({
         {currentLesson.discussionQuestions && (
           <button
             onClick={() => setActiveSection('discussion')}
-            className={`flex-1 py-3 px-4 text-center text-sm font-medium border-b-2 ${
+            className={`flex-1 py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm font-medium border-b-2 whitespace-nowrap ${
               activeSection === 'discussion' 
                 ? 'border-primary text-primary' 
                 : 'border-transparent hover:text-primary/80 hover:border-primary/30'
             }`}
           >
-            <AlertCircle className="w-4 h-4 inline-block mr-2" />
+            <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 inline-block mr-1 sm:mr-2" />
             Discussion
           </button>
         )}
       </div>
       
       {/* Content */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {activeSection === 'content' && (
           <div>
             {currentLesson.objectives && (
-              <div className="mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-                <h4 className="text-sm font-medium uppercase tracking-wider text-primary mb-2">Learning Objectives</h4>
-                <ul className="list-disc pl-5 space-y-1">
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <h4 className="text-xs sm:text-sm font-medium uppercase tracking-wider text-primary mb-2">Learning Objectives</h4>
+                <ul className="list-disc pl-4 sm:pl-5 space-y-1">
                   {currentLesson.objectives.map((objective, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">{objective}</li>
+                    <li key={i} className="text-xs sm:text-sm text-muted-foreground">{objective}</li>
                   ))}
                 </ul>
               </div>
             )}
             
-            <div className="space-y-8">
+            <div className="space-y-6 sm:space-y-8">
               {currentLesson.content.map((section, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: i * 0.1 }}
-                  className="space-y-3"
+                  className="space-y-2 sm:space-y-3"
                 >
-                  <h4 className="text-lg font-medium">{section.title}</h4>
-                  <div className="prose dark:prose-invert prose-sm max-w-none leading-relaxed">
+                  <h4 className="text-base sm:text-lg font-medium">{section.title}</h4>
+                  <div className="prose dark:prose-invert prose-sm max-w-none leading-relaxed text-sm sm:text-base">
                     {renderContent(section.content)}
                   </div>
                 </motion.div>
@@ -193,23 +193,25 @@ export const ModuleViewer = ({
         )}
         
         {activeSection === 'activities' && currentLesson.activities && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {currentLesson.activities.map((activity, i) => (
-              <div key={i} className="p-5 border rounded-lg">
-                <h4 className="text-lg font-medium mb-3">{activity.title}</h4>
-                <Markdown>{activity.description}</Markdown>
+              <div key={i} className="p-3 sm:p-5 border rounded-lg">
+                <h4 className="text-base sm:text-lg font-medium mb-2 sm:mb-3">{activity.title}</h4>
+                <div className="text-sm sm:text-base">
+                  <Markdown>{activity.description}</Markdown>
+                </div>
               </div>
             ))}
           </div>
         )}
         
         {activeSection === 'discussion' && currentLesson.discussionQuestions && (
-          <div className="space-y-6">
-            <h4 className="text-lg font-medium">Discussion Questions</h4>
-            <ul className="space-y-4">
+          <div className="space-y-4 sm:space-y-6">
+            <h4 className="text-base sm:text-lg font-medium">Discussion Questions</h4>
+            <ul className="space-y-3 pl-4 sm:pl-5 list-disc">
               {currentLesson.discussionQuestions.map((question, i) => (
-                <li key={i} className="p-4 border rounded-lg">
-                  <p className="font-medium">{i + 1}. {question}</p>
+                <li key={i} className="text-sm sm:text-base">
+                  <Markdown>{question}</Markdown>
                 </li>
               ))}
             </ul>
@@ -217,33 +219,29 @@ export const ModuleViewer = ({
         )}
       </div>
       
-      {/* Navigation */}
-      <div className="border-t p-4 flex justify-between items-center">
+      {/* Navigation Buttons */}
+      <div className="flex justify-between items-center p-4 sm:p-6 border-t">
         <Button
           variant="outline"
           size="sm"
           onClick={handlePrevious}
           disabled={currentLessonIndex === 0}
-          className={currentLessonIndex === 0 ? 'opacity-50' : ''}
+          className="space-x-1 text-xs sm:text-sm h-8 sm:h-9"
         >
-          <ChevronLeft className="w-4 h-4 mr-2" />
-          Previous
+          <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4" />
+          <span>Previous</span>
         </Button>
         
-        <Button 
+        <Button
           size="sm"
           onClick={handleNext}
+          className="space-x-1 text-xs sm:text-sm h-8 sm:h-9"
         >
+          <span>{isLastLesson ? 'Complete' : 'Next'}</span>
           {isLastLesson ? (
-            <>
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Complete
-            </>
+            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4" />
           ) : (
-            <>
-              Next
-              <ChevronRight className="w-4 h-4 ml-2" />
-            </>
+            <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4" />
           )}
         </Button>
       </div>

@@ -2,21 +2,7 @@
   "version": 2,
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_test_anVzdC1wbGF0eXB1cy04MC5jbGVyay5hY2NvdW50cy5kZXYk",
-    "CLERK_SECRET_KEY": "sk_test_nYOtzFFtkRTqPorKzn4P7LhKtBxxw8IEra7xoxqkhE",
-    "DATABASE_URL": "postgres://postgres.ljfzequmcnhjjozdyagh:Abida1966.@aws-0-eu-west-2.pooler.supabase.com:6543/postgres",
-    "NEXT_PUBLIC_CLERK_SIGN_IN_URL": "/sign-in",
-    "NEXT_PUBLIC_CLERK_SIGN_UP_URL": "/sign-up",
-    "NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL": "/dashboard",
-    "NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL": "/dashboard",
-    "CLOUDINARY_CLOUD_NAME": "db3d4xzdn",
-    "CLOUDINARY_API_KEY": "549542333541745",
-    "CLOUDINARY_API_SECRET": "6J7eTtbWHHI_fpI2byGe_PVayfc",
-    "CLERK_WEBHOOK_SECRET": "whsec_iJcgBxDz8RBM3a8M6bEy4a+Kc4BLRuEp",
-    "MONGODB_URI": "mongodb+srv://burhantahit743:Abida1966@komodo.opqy0.mongodb.net/komodo?retryWrites=true&w=majority"
-  }
+  "regions": ["iad1"]
 } 

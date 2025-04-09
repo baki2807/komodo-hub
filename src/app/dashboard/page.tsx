@@ -196,7 +196,7 @@ function DashboardContent() {
               <Calendar className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Recent Posts (7d)</p>
+              <p className="text-sm text-muted-foreground">Recent Posts (last 7 days)</p>
               <h3 className="text-2xl font-bold">{stats.recentPosts}</h3>
             </div>
           </div>

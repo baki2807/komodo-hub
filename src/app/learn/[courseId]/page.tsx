@@ -38,6 +38,7 @@ function CourseContent({ params }: { params: { courseId: string } }) {
   const [course, setCourse] = useState<Course | null>(null)
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isResetting, setIsResetting] = useState(false)
 
   const fetchCourse = useCallback(async () => {
     try {
@@ -83,6 +84,37 @@ function CourseContent({ params }: { params: { courseId: string } }) {
   const calculateProgress = () => {
     if (!course || !userProgress?.completedModules) return 0
     return (userProgress.completedModules.length / course.modules.length) * 100
+  }
+
+  const resetProgress = async () => {
+    if (!user || !course) return
+    
+    if (!confirm('Are you sure you want to reset your progress for this course? This action cannot be undone.')) {
+      return
+    }
+    
+    setIsResetting(true)
+    
+    try {
+      const response = await fetch('/api/user-progress/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          courseId: course._id
+        })
+      })
+      
+      if (!response.ok) throw new Error('Failed to reset progress')
+      
+      // Update local state
+      setUserProgress(prev => prev ? { ...prev, completedModules: [] } : null)
+      toast.success('Progress has been reset')
+    } catch (error) {
+      console.error('Error resetting progress:', error)
+      toast.error('Failed to reset progress')
+    } finally {
+      setIsResetting(false)
+    }
   }
 
   if (!isLoaded || isLoading) {
@@ -164,6 +196,19 @@ function CourseContent({ params }: { params: { courseId: string } }) {
               </div>
             </div>
             <Progress value={calculateProgress()} className="h-2" />
+            
+            {/* Reset Progress Button */}
+            {userProgress?.completedModules && userProgress.completedModules.length > 0 && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  onClick={resetProgress}
+                  disabled={isResetting}
+                  className="text-xs text-destructive hover:underline focus:outline-none transition-colors disabled:opacity-50"
+                >
+                  {isResetting ? 'Resetting...' : 'Reset Progress'}
+                </button>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </motion.div>

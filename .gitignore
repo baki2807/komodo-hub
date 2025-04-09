@@ -40,3 +40,6 @@ next-env.d.ts
 # Database
 /drizzle/migrations/ 
 .vercel
+
+# clerk configuration (can include secrets)
+/.clerk/

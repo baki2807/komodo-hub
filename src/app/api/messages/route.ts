@@ -72,7 +72,7 @@ export async function GET(request: Request) {
           )
         )
       )
-      .orderBy(desc(messages.createdAt))
+      .orderBy(messages.createdAt)
 
     // Format messages for the frontend
     const formattedMessages = allMessages.map(message => ({
