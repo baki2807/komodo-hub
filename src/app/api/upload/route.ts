@@ -59,6 +59,11 @@ export async function POST(request: Request) {
                       MAX_IMAGE_SIZE,
             chunk_size: 6000000, // 6MB chunks for better upload handling
             timeout: 120000, // 2 minutes timeout per chunk
+            eager: file.type.startsWith('video/') ? [
+              { width: 640, height: 360, crop: 'scale' }
+            ] : undefined,
+            eager_async: true,
+            eager_notification_url: process.env.CLOUDINARY_WEBHOOK_URL
           },
           (error, result) => {
             if (error) {
@@ -77,7 +82,13 @@ export async function POST(request: Request) {
           reject(new Error('Failed to process upload stream'));
         });
 
-        uploadStream.end(buffer);
+        // Write the buffer in chunks
+        const chunkSize = 1024 * 1024; // 1MB chunks
+        for (let i = 0; i < buffer.length; i += chunkSize) {
+          const chunk = buffer.slice(i, i + chunkSize);
+          uploadStream.write(chunk);
+        }
+        uploadStream.end();
       });
 
       return NextResponse.json({ url: (result as any).secure_url });

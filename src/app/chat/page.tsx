@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 import { motion } from 'framer-motion'
-import { Send, Trash2, MoreVertical } from 'lucide-react'
+import { Send, Trash2, MoreVertical, RefreshCw } from 'lucide-react'
 import { Navbar } from '@/components/Navbar'
 import {
   DropdownMenu,
@@ -49,6 +49,7 @@ function ChatContent() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const [isDeletingMessage, setIsDeletingMessage] = useState<string | null>(null)
+  const pollingIntervalRef = useRef<NodeJS.Timeout>()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -66,22 +67,29 @@ function ChatContent() {
       
       const data = await response.json();
       
-      // Format users for the UI
-      const formattedUsers = data.map((user: any) => ({
-        id: user.clerkId,
-        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Anonymous',
-        image: user.imageUrl || ''
-      }));
+      // Format users for the UI and filter out test users
+      const formattedUsers = data
+        .map((user: any) => ({
+          id: user.clerkId,
+          name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'New User',
+          image: user.imageUrl || ''
+        }))
+        .filter((u: { id: string, name: string }) => {
+          // Filter out the current user
+          if (u.id === user?.id) return false;
+          
+          // Filter out obvious test accounts
+          const lowerName = u.name.toLowerCase();
+          if (lowerName === 'new user') return false;
+          if (lowerName === 'test') return false;
+          if (lowerName.includes('test user')) return false;
+          if (lowerName.includes('test account')) return false;
+          if (lowerName === '') return false;
+          
+          return true;
+        });
       
-      // Filter out the current user and any obvious test users
-      const filteredUsers = formattedUsers.filter(
-        (u: { id: string, name: string }) => 
-          u.id !== user?.id && 
-          !u.name.toLowerCase().includes('test') &&
-          !u.name.toLowerCase().includes('anonymous')
-      );
-      
-      setUsers(filteredUsers);
+      setUsers(formattedUsers);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Failed to load users');
@@ -104,9 +112,20 @@ function ChatContent() {
 
   useEffect(() => {
     if (isLoaded && user) {
-      fetchUsers()
+      // Initial fetch
+      fetchUsers();
+
+      // Set up polling every 10 seconds
+      pollingIntervalRef.current = setInterval(fetchUsers, 10000);
+
+      // Cleanup interval on unmount
+      return () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+        }
+      };
     }
-  }, [isLoaded, user, fetchUsers])
+  }, [isLoaded, user, fetchUsers]);
 
   useEffect(() => {
     if (selectedUser) {
@@ -153,28 +172,59 @@ function ChatContent() {
   }
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!user) {
-      toast.error('You must be logged in to delete messages')
-      return
-    }
-
-    setIsDeletingMessage(messageId)
     try {
       const response = await fetch(`/api/messages/${messageId}`, {
         method: 'DELETE',
-      })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete message');
+      }
 
-      if (!response.ok) throw new Error('Failed to delete message')
-
-      setMessages(prev => prev.filter(msg => msg._id !== messageId))
-      toast.success('Message deleted')
+      // Update messages state by filtering out the deleted message
+      setMessages(messages.filter(msg => msg._id !== messageId));
+      toast.success("Message deleted successfully");
     } catch (error) {
-      console.error('Error deleting message:', error)
-      toast.error('Failed to delete message')
-    } finally {
-      setIsDeletingMessage(null)
+      console.error('Error deleting message:', error);
+      toast.error("Failed to delete the message. Please try again.");
     }
-  }
+  };
+
+  const handleRefreshUsers = async () => {
+    if (!user) return;
+    
+    try {
+      const response = await fetch('/api/dev-webhook/clerk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          eventType: 'user.created',
+          data: {
+            id: user.id,
+            email_addresses: user.emailAddresses.map(email => ({
+              email_address: email.emailAddress
+            })),
+            first_name: user.firstName,
+            last_name: user.lastName,
+            image_url: user.imageUrl
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh user data');
+      }
+
+      // Refetch users
+      fetchUsers();
+      toast.success('User data refreshed');
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+      toast.error('Failed to refresh user data');
+    }
+  };
 
   if (!isLoaded) {
     return (
@@ -198,7 +248,18 @@ function ChatContent() {
     <main className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-8">Messages</h1>
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold">Messages</h1>
+          <Button
+            onClick={handleRefreshUsers}
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            Refresh Users
+          </Button>
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Users List */}
@@ -302,7 +363,7 @@ function ChatContent() {
                           }`}
                         >
                           <div
-                            className={`max-w-[70%] rounded-lg p-3 ${
+                            className={`max-w-[70%] rounded-lg p-3 relative group ${
                               message.sender.id === user?.id
                                 ? "bg-blue-500 text-white"
                                 : "bg-gray-200 text-gray-800"
@@ -318,6 +379,15 @@ function ChatContent() {
                                 hour12: true
                               })}
                             </p>
+                            {message.sender.id === user?.id && (
+                              <button
+                                onClick={() => handleDeleteMessage(message._id)}
+                                className="absolute -right-6 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Delete message"
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive hover:text-destructive/80" />
+                              </button>
+                            )}
                           </div>
                         </div>
                       ))}

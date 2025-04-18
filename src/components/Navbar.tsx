@@ -7,6 +7,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function Navbar() {
   const { isSignedIn } = useUser()
@@ -17,6 +18,13 @@ export function Navbar() {
   useEffect(() => {
     setIsClient(true)
   }, [])
+
+  const handleLearnClick = (e: React.MouseEvent) => {
+    if (!isSignedIn) {
+      e.preventDefault()
+      toast.error('Please sign in to access learning content')
+    }
+  }
 
   return (
     <>
@@ -66,6 +74,7 @@ export function Navbar() {
                       <Link 
                         href="/learn" 
                         className="text-sm text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white transition-colors"
+                        onClick={handleLearnClick}
                       >
                         Learn
                       </Link>
@@ -143,7 +152,10 @@ export function Navbar() {
                   <Link 
                     href="/learn" 
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 dark:text-[#94A3B8] hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#1D2B3F] transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={(e) => {
+                      handleLearnClick(e)
+                      setIsMenuOpen(false)
+                    }}
                   >
                     Learn
                   </Link>
