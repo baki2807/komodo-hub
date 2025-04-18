@@ -1,170 +1,158 @@
-# Komodo Hub
+# Komodo Hub - Wildlife Conservation Learning Platform
 
-A modern learning platform built with Next.js, featuring interactive courses, real-time chat, and social features.
 
-## Features
+## Project Overview
 
-- 🎓 Interactive Learning Modules
-- 💬 Real-time Chat System
-- 👥 User Profiles and Progress Tracking
-- 🖼️ Image Upload with Cloudinary
-- 🔒 Secure Authentication with Clerk
-- 📱 Responsive Design
-- 🎨 Modern UI with Tailwind CSS
+Komodo Hub is an innovative web-based learning platform dedicated to wildlife conservation education, with a special focus on Indonesian wildlife. This project was developed as part of the COMP5005 Advanced Software Development course, demonstrating the application of modern web development technologies and software engineering principles.
 
-## Tech Stack
+## Learning Objectives Achieved
 
-- Next.js 14
-- PostgreSQL with Drizzle ORM
-- Clerk Authentication
-- Cloudinary for Image Storage
-- Tailwind CSS for Styling
-- TypeScript
+1. **Modern Web Development**
+   - Implemented a full-stack application using Next.js 14 and TypeScript
+   - Applied server-side rendering and API routes for optimal performance
+   - Utilized modern authentication patterns with Clerk
 
-## Prerequisites
+2. **Database Management**
+   - Designed and implemented a PostgreSQL database schema
+   - Utilized Drizzle ORM for type-safe database operations
+   - Implemented efficient data querying and management
 
-- Node.js 18+ and npm
-- PostgreSQL Database
+3. **User Experience & Interface Design**
+   - Created a responsive, accessible interface using Tailwind CSS
+   - Implemented dark/light theme support
+   - Designed intuitive navigation and learning paths
+
+4. **Security & Best Practices**
+   - Implemented secure authentication and authorization
+   - Applied proper error handling and input validation
+   - Utilized environment variables for sensitive data
+
+## Key Features
+
+### 1. Learning Management System
+- Interactive course modules focused on wildlife conservation
+- Progress tracking and achievement system
+- Multimedia content integration
+
+### 2. Community Engagement
+- Real-time chat functionality
+- Discussion forums for conservation topics
+- User profiles and progress sharing
+
+### 3. Administrative Features
+- Course content management
+- User progress monitoring
+- Analytics and reporting tools
+
+## Technical Implementation
+
+### Technology Stack
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, PostgreSQL, Drizzle ORM
+- **Authentication**: Clerk
+- **Media Storage**: Cloudinary
+- **Deployment**: Vercel
+
+### Architecture Overview
+```
+src/
+├── app/                 # Next.js app directory and pages
+├── components/          # Reusable UI components
+├── lib/                 # Utility functions and configurations
+├── models/             # Database models and schemas
+└── types/              # TypeScript type definitions
+```
+
+## Development Setup
+
+### Prerequisites
+- Node.js 18+
+- PostgreSQL
 - Clerk Account
 - Cloudinary Account
 
-## Environment Variables
-
-Create a `.env` file with the following variables:
-
+### Environment Configuration
 ```env
-DATABASE_URL="your_postgresql_url"
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="your_clerk_publishable_key"
-CLERK_SECRET_KEY="your_clerk_secret_key"
-CLOUDINARY_CLOUD_NAME="your_cloudinary_cloud_name"
-CLOUDINARY_API_KEY="your_cloudinary_api_key"
-CLOUDINARY_API_SECRET="your_cloudinary_api_secret"
-CLERK_WEBHOOK_SECRET="your_clerk_webhook_secret"
+DATABASE_URL="postgresql_connection_string"
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="clerk_public_key"
+CLERK_SECRET_KEY="clerk_secret_key"
+CLOUDINARY_CLOUD_NAME="cloudinary_name"
+CLOUDINARY_API_KEY="cloudinary_key"
+CLOUDINARY_API_SECRET="cloudinary_secret"
+CLERK_WEBHOOK_SECRET="clerk_webhook_secret"
 ```
 
-## Local Development
+### Installation Steps
+1. Clone the repository
+   ```bash
+   git clone [repository-url]
+   cd komodo-hub
+   ```
 
-1. Install dependencies:
+2. Install dependencies
    ```bash
    npm install
    ```
 
-2. Set up the database:
+3. Set up the database
    ```bash
    npm run db:generate
    npm run db:push
    ```
 
-3. Initialize sample data:
-   ```bash
-   npm run init
-   ```
-
-4. Start the development server:
+4. Start development server
    ```bash
    npm run dev
    ```
 
+## Testing and Quality Assurance
+
+### Testing Methodology
+- Unit tests for core functionality
+- Integration tests for API endpoints
+- End-to-end testing for critical user journeys
+
+### Code Quality
+- ESLint for code style enforcement
+- TypeScript for type safety
+- Prettier for consistent formatting
+
 ## Deployment
 
-### Vercel Deployment
+The application is deployed on Vercel and can be accessed at: [Your Deployment URL]
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add the following environment variables in Vercel:
-   - DATABASE_URL
-   - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-   - CLERK_SECRET_KEY
-   - CLOUDINARY_CLOUD_NAME
-   - CLOUDINARY_API_KEY
-   - CLOUDINARY_API_SECRET
-   - CLERK_WEBHOOK_SECRET
+## Reflections and Learnings
 
-4. Deploy!
+### Technical Challenges
+- Implementing real-time features with WebSocket
+- Managing state across multiple components
+- Optimizing database queries for performance
 
-### Database Setup
+### Future Improvements
+1. Implementation of machine learning for personalized learning paths
+2. Integration with external conservation APIs
+3. Mobile application development
+4. Enhanced analytics and reporting features
 
-1. Create a PostgreSQL database
-2. Run migrations:
-   ```bash
-   npm run db:generate
-   npm run db:push
-   ```
-3. Initialize data:
-   ```bash
-   npm run init
-   ```
+## Academic Context
 
-## Contributing
+This project demonstrates the practical application of software engineering principles learned in COMP5005, including:
+- Software Architecture Design
+- Modern Web Development Practices
+- Database Management
+- Security Implementation
+- User Experience Design
 
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a new Pull Request
+## References
+
+1. Next.js Documentation - https://nextjs.org/docs
+2. Clerk Authentication - https://clerk.com/docs
+3. Tailwind CSS - https://tailwindcss.com/docs
+4. Drizzle ORM - https://orm.drizzle.team/docs/overview
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Project Structure
-
-```
-src/
-├── app/                 # Next.js app directory
-├── components/          # Reusable components
-├── lib/                 # Utility functions and configurations
-├── models/             # MongoDB models
-├── store/              # Redux store configuration
-└── types/              # TypeScript type definitions
-```
-
-## Setting up Clerk Webhooks
-
-1. Go to your Clerk Dashboard (https://dashboard.clerk.com)
-2. Navigate to your application's Webhooks section
-3. Create a new webhook endpoint with the URL: `https://your-domain.com/api/webhook/clerk`
-4. Select the following events to monitor:
-   - user.created
-   - user.updated
-   - user.deleted
-5. Copy the Webhook Secret and add it to your `.env` file:
-   ```
-   CLERK_WEBHOOK_SECRET=whsec_your_webhook_secret_from_clerk_dashboard
-   ```
-6. Deploy your application to ensure the webhook endpoint is accessible
-
-The webhook handler will automatically sync user data between Clerk and your database when users are created, updated, or deleted.
-
-## Local Development Without Webhooks
-
-When developing locally, Clerk webhooks can't reach your localhost. Here are two solutions:
-
-### 1. Automatic User Creation (Already Implemented)
-
-The `/api/users` endpoint automatically creates users in your database when they're authenticated with Clerk but don't exist in your database yet.
-
-### 2. Manual Webhook Simulation
-
-You can manually trigger webhook events using the development endpoint:
-
-```bash
-# Create/update a user
-curl -X POST http://localhost:3000/api/dev-webhook/clerk \
-  -H "Content-Type: application/json" \
-  -d '{
-    "eventType": "user.created",
-    "data": {
-      "id": "YOUR_CLERK_USER_ID",
-      "email_addresses": [{"email_address": "user@example.com"}],
-      "first_name": "John",
-      "last_name": "Doe",
-      "image_url": "https://example.com/avatar.jpg"
-    }
-  }'
-```
-
-Replace `YOUR_CLERK_USER_ID` with your actual Clerk user ID.
+This project is submitted as part of the 5005CMD course requirements and is subject to university academic policies.
 
 
 

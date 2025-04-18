@@ -19,6 +19,26 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Komodo Hub',
   description: 'A community-driven platform for animal conservation in Indonesia',
+  icons: {
+    icon: [
+      {
+        url: '/icon.png',
+        sizes: '32x32',
+        type: 'image/png'
+      },
+      {
+        url: '/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml'
+      }
+    ],
+    apple: {
+      url: '/apple-icon.png',
+      sizes: '180x180',
+      type: 'image/png'
+    },
+    shortcut: '/favicon.ico'
+  }
 }
 
 interface RootLayoutProps {
